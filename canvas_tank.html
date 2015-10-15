@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>canvas hello world</title>
+
+	<style type="text/css">
+		.wrapper {
+			position: absolute;
+			top: 50px;
+			left:50px;
+		}
+	</style>
+</head>
+<body>
+	<div>
+		<canvas id="canvasOne" width="640" height="480">
+			Your browser does not support HTML5 canvas!
+		</canvas>
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+	window.addEventListener("load",function() {
+		canvasApp();
+	});
+
+	function canvasSupport() {
+		return !!document.createElement("canvas").getContext;
+	};
+
+	function canvasApp() {
+		if(!canvasSupport()) {
+			alert("Not support canvas!");
+			return;
+		}
+
+		var theCanvas = document.getElementById("canvasOne");
+		var context = theCanvas.getContext("2d");
+
+		var tileSheet = new Image();
+		tileSheet.src = "tanks_sheet.png";
+		var animationFrames = [1,2,3,4,5,6,7,8];
+		var frameIndex = 0;
+		var rotation = 90;
+		var dx = 0;
+		var dy = -1;
+		var x = 200;
+		var y = 300;
+
+		function drawScreen() {
+			x = x + dx;
+			y = y + dy;
+
+			context.fillStyle = "#aaa";
+			context.fillRect(0,0,500,500);
+
+			context.save();
+			context.setTransform(1,0,0,1,0,0);
+			var angleInRadians = rotation * Math.PI / 180;
+			context.translate(x+16,y+16);
+			context.rotate(angleInRadians);
+
+			var sourceX = Math.floor(animationFrames[frameIndex] % 8) * 23;
+			var sourceY = Math.floor(animationFrames[frameIndex] / 8) * 22 + 1;
+
+			context.drawImage(tileSheet, sourceX, sourceY,19,21,x,y,30,30);
+			context.restore();
+
+			frameIndex++;
+			if(frameIndex === animationFrames.length) {
+				frameIndex = 0;
+			}
+		}
+
+		setInterval(drawScreen, 100);
+	};
+</script>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>canvas hello world</title>
+
+	<style type="text/css">
+		.wrapper {
+			position: absolute;
+			top: 50px;
+			left:50px;
+		}
+	</style>
+</head>
+<body>
+	<div>
+		<canvas id="canvasOne" width="640" height="480">
+			Your browser does not support HTML5 canvas!
+		</canvas>
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+	window.addEventListener("load",function() {
+		canvasApp();
+	});
+
+	function canvasSupport() {
+		return !!document.createElement("canvas").getContext;
+	};
+
+	function canvasApp() {
+		if(!canvasSupport()) {
+			alert("Not support canvas!");
+			return;
+		}
+
+		var theCanvas = document.getElementById("canvasOne");
+		var context = theCanvas.getContext("2d");
+
+		function drawScreen() {
+			//Background
+			context.globalAlpha = 1;
+			context.fillStyle = "#000";
+			context.fillRect(0,0,640,480);
+
+			//Image
+			context.globalAlpha = .25;
+			context.drawImage(helloWorldImage, 0,0);
+
+			if(fadeIn) {
+				alpha += .01;
+				if(alpha >= 1) {
+					alpha = 1;
+					fadeIn = false;
+				}
+			} else {
+				alpha -= .01;
+				if(alpha < 0) {
+					alpha = 0;
+					fadeIn = true;
+				} 
+			}
+
+			//Text
+			context.font = "72px Sans-Serif";
+			context.textBaseline = "top";
+
+			context.globalAlpha = alpha;
+			context.fillStyle = "#fff";
+			context.fillText(text, 150, 200);
+		}
+
+		var text = "Hello World";
+		var alpha = 0;
+		var fadeIn = true;
+
+		//Image 
+		var helloWorldImage = new Image();
+		helloWorldImage.src = "download-app.png";
+
+		setInterval(drawScreen, 20);
+	};
+</script>

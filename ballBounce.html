@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Ball bounce</title>
+</head>
+<body>
+	<div>
+		<canvas id="canvasOne" width="640" height="480">
+			Your browser does not support HTML5 canvas!
+		</canvas>
+		<form>
+			Canvas Width:
+			<input type="range" id="canvasWidth" min="0" max="1000" step="1" value="500"/>
+			<br>
+			Canvas Height:
+			<input type="range" id="canvasHeight" min="0" max="1000" step="1" value="500"/>
+		</form>
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+	window.addEventListener("load",function() {
+		canvasApp();
+	});
+
+	function canvasSupport() {
+		return !!document.createElement("canvas").getContext;
+	};
+
+	function canvasApp() {
+		if(!canvasSupport()) {
+			alert("Not support canvas!");
+			return;
+		}
+
+		document.getElementById("canvasWidth").addEventListener("change",function(e) {
+			theCanvas.width = e.target.value;
+			drawScreen();
+		});
+
+		document.getElementById("canvasHeight").addEventListener("change",function(e) {
+			theCanvas.height = e.target.value;
+			drawScreen();
+		});
+
+		var theCanvas = document.getElementById("canvasOne");
+		var context = theCanvas.getContext("2d");
+		var numBalls = 10;
+		var maxSize = 8;
+		var minSize = 5;
+		var maxSpeed = maxSize + 5;
+		var balls = [];
+		var tempBall, tempX, tempY, tempSpeed, tempAngle, tempRadius, tempRadians, tempXunits, tempYunits;
+		for (var i = 0; i < numBalls; i++) {
+			tempRadius = Math.floor(Math.random()*maxSize) + minSize;
+			tempX = tempRadius*2 +(Math.floor(Math.random()*theCanvas.width) - tempRadius*2);
+			tempY = tempRadius*2 +(Math.floor(Math.random()*theCanvas.height) - tempRadius*2);
+			tempSpeed = maxSpeed - tempRadius;
+			tempAngle = Math.floor(Math.random()*360);
+			tempRadians = tempAngle * Math.PI / 180;
+			tempXunits = Math.cos(tempRadians) * tempSpeed;
+			tempYunits = Math.sin(tempRadians) * tempSpeed;
+
+			tempBall = {x:tempX, y:tempY, radius:tempRadius, speed:tempSpeed, angle:tempAngle, xunits:tempXunits, yunits:tempYunits};
+			balls.push(tempBall);
+		};
+
+		function drawScreen() {
+			context.fillStyle = "#eee";
+			context.fillRect(0,0, theCanvas.width, theCanvas.height);
+
+			context.strokeStyle = "#000";
+			context.strokeRect(1, 1, theCanvas.width-2, theCanvas.height-2);
+			context.fillStyle = "#000";
+			var ball;
+
+			for (var i = 0; i < balls.length; i++) {
+				ball = balls[i];
+				ball.x += ball.xunits;
+				ball.y += ball.yunits;
+
+				context.beginPath();
+				context.arc(ball.x, ball.y, 15, 0, Math.PI*2, true);
+				context.closePath();
+				context.fill();
+
+				if(ball.x > theCanvas.width || ball.x < 0) {
+				ball.angle = 180 - ball.angle;
+				updateBall(ball);
+				} else if(ball.y > theCanvas.height || ball.y < 0) {	
+					ball.angle = 360 - ball.angle;
+					updateBall(ball);
+				}
+			};
+		};
+
+		function updateBall(ball) {
+			ball.radians = ball.angle * Math.PI/180;
+			ball.xunits = Math.cos(ball.radians) * ball.speed;
+			ball.yunits = Math.sin(ball.radians) * ball.speed;
+		};
+
+
+
+		setInterval(drawScreen, 20);
+	};
+</script>

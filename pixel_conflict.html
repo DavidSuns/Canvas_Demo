@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Pixel Collisions</title>
+
+	<style type="text/css">
+		.wrapper {
+			position: absolute;
+			top: 50px;
+			left:50px;
+		}
+	</style>
+</head>
+<body>
+	<div>
+		<canvas id="canvasOne" width="640" height="480">
+			Your browser does not support HTML5 canvas!
+		</canvas>
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+	window.addEventListener("load",function() {
+		canvasApp();
+	});
+
+	function canvasSupport() {
+		return !!document.createElement("canvas").getContext;
+	};
+
+	function canvasApp() {
+		if(!canvasSupport()) {
+			alert("Not support canvas!");
+			return;
+		}
+
+		var theCanvas = document.getElementById("canvasOne");
+		var context = theCanvas.getContext("2d");
+
+		var blueObject = {};
+		var redObject = {};
+		blueObject.x = 0;
+		blueObject.y = 200;
+		blueObject.dx = 2;
+		blueObject.width = 225;
+		blueObject.height = 225;
+		blueObject.image = new Image();
+		blueObject.image.onload = function() {
+			context.drawImage(blueObject.image, 0, 0);
+			blueObject.blueImageData = context.getImageData(0,0,blueObject.width,blueObject.height);
+			context.clearRect(0,0,theCanvas.width,theCanvas.height);
+		};
+		blueObject.image.src = "blueplus.png";
+
+		redObject.x = 348;
+		redObject.y = 200;
+		redObject.dx = -2;
+		redObject.width = 226;
+		redObject.height =223;
+		redObject.image = new Image();
+		redObject.image.onload = function() {
+			context.drawImage(redObject.image, 0, 0, 226, 223);
+			redObject.redImageData = context.getImageData(0,0,redObject.width, redObject.height);
+			context.clearRect(0,0,theCanvas.width,theCanvas.height);
+		};
+		redObject.image.src = "redcircle.png";
+
+		function drawScreen() {
+			blueObject.x += blueObject.dx;
+			redObject.x += redObject.dx;
+
+			context.clearRect(0,0,theCanvas.width,theCanvas.height);
+			context.drawImage(blueObject.image, blueObject.x, blueObject.y);
+			context.drawImage(redObject.image, redObject.x, redObject.y);
+
+			if(boundingBoxCollide(blueObject, redObject)) {
+				var xMin = Math.max(blueObject.x, redObject.x);
+				var yMin = Math.max(blueObject.y, redObject.y);
+				var xMax = Math.min(blueObject.x + blueObject.width, redObject.x + redObject.width);
+				var yMax = Math.min(blueObject.y + blueObject.height, redObject.y + redObject.height);
+
+				for(var pixelX = xMin; pixelX < xMax; pixelX++) {
+					for(var pixelY = yMin; pixelY < yMax; pixelY++) {
+						var bluePixel = ((pixelX - blueObject.x) + (pixelY - blueObject.y) * blueObject.width)*4 + 3;
+						var redPixel = ((pixelX - redObject.x) + (pixelY - redObject.y) * redObject.width)*4 + 3;
+
+						if((blueObject.blueImageData.data[bluePixel] !== 0) && (redObject.redImageData.data[redPixel] !== 0)) {
+							console.log("pixel collision");
+							blueObject.dx = 0;
+							redObject.dx = 0;
+							break;
+						}
+					}
+				}
+			}	
+		}
+
+		function boundingBoxCollide(obj1, obj2) {
+			var left1 = obj1.x;
+			var right1 = obj1.x + obj1.width;
+			var top1 = obj1.y;
+			var bottom1 = obj1.y + obj1.height;
+
+			var left2 = obj2.x;
+			var right2 = obj2.x + obj2.width;
+			var top2 = obj2.y;
+			var bottom2 = obj2.y + obj2.height;
+
+			if(bottom1 < top2 ) { return false; }
+			if(top1 > bottom2 ) { return false; }
+
+			if(right1 < left2 ) { return false; }
+			if(left1 > right2 ) { return false; }
+
+			return true;
+		};
+
+		setInterval(drawScreen, 100);
+	};
+</script>

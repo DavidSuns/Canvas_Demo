@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Tile Stamper Application</title>
+
+	<style type="text/css">
+		.wrapper {
+			position: absolute;
+			top: 50px;
+			left:50px;
+		}
+	</style>
+</head>
+<body>
+	<div>
+		<canvas id="canvasOne" width="640" height="480">
+			Your browser does not support HTML5 canvas!
+		</canvas>
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+	window.addEventListener("load",function() {
+		canvasApp();
+	});
+
+	function canvasSupport() {
+		return !!document.createElement("canvas").getContext;
+	};
+
+	function canvasApp() {
+		if(!canvasSupport()) {
+			alert("Not support canvas!");
+			return;
+		}
+
+		var theCanvas = document.getElementById("canvasOne");
+		var context = theCanvas.getContext("2d");
+
+		var mouseX, mouseY;
+		var tileSheet = new Image();
+		tileSheet.src = "tanks_sheet.png";
+
+		function startUp() {
+			context.fillStyle = "#aaa";
+			context.fillRect(0,0,256,256);
+			drawTileSheet();
+		};
+
+		function drawTileSheet() {
+			context.drawImage(tileSheet,0,0);
+		};
+
+		function highlightTile(tileId, x, y) {
+			context.fillStyle = "aaa";
+			context.fillRect(0,0,256,128);
+			drawTileSheet();
+			imageData = context.getImageData(x,y,32,32);
+
+			for (var i = 3; i < imageData.data.length; i+=4) {
+				imageData.data[i] = 128;
+			}
+
+			var startX = Math.floor(tileId % 8)*32;
+			var startY = Math.floor(tileId / 8)*32;
+
+			context.strokeStyle = "red";
+			context.strokeRect(startX, startY, 32, 32);
+		};
+
+		function onMouseMove(e) {
+			mouseX = e.clientX - theCanvas.offsetLeft;
+			mouseY = e.clientY - theCanvas.offsetTop;
+		};
+
+		function onMouseClick(e) {
+			var col = Math.floor(mouseX / 32);
+			
+			var row = Math.floor(mouseY / 32);
+			if(mouseY < 128) {
+				var tileId = row * 7 + col + row;
+				highlightTile(tileId, col*32, row*32);
+			} else {
+				context.putImageData(imageData, col*32, row*32);
+			}
+		};
+
+		theCanvas.addEventListener("mousemove", onMouseMove);
+		theCanvas.addEventListener("click", onMouseClick);
+		// startUp();
+	};
+</script>
