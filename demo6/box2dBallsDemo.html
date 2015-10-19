@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Box2D balls demo</title>
+
+</head>
+<body>
+	<div>
+		<canvas id="canvasOne" width="640" height="480">
+			Your browser does not support HTML5 canvas!
+		</canvas>
+	</div>
+</body>
+</html>
+<script type="text/javascript" src="./Box2D.js"></script>		
+<script type="text/javascript">
+	window.addEventListener("load",function() {
+		canvasApp();
+	});
+
+	function canvasSupport() {
+		return !!document.createElement("canvas").getContext;
+	};
+
+	function canvasApp() {
+		if(!canvasSupport()) {
+			alert("Not support canvas!");
+			return;
+		}
+
+		var theCanvas = document.getElementById("canvasOne");
+		var context = theCanvas.getContext("2d");
+		var b2Vec2 = Box2D.Common.Math.b2Vec2,
+			b2BodyDef = Box2D.Dynamics.b2BodyDef,
+			b2Body = Box2D.Dynamics.b2Body,
+			b2FixtureDef = Box2D.Dynamics.b2FixtureDef,
+			b2World = Box2D.Dynamics.b2World,
+			b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape,
+			b2CircleShape = Box2D.Collision.Shapes.b2CircleShape,
+			b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
+
+		var world = new b2World(new b2Vec2(0,10),true);
+		var numBalls = 30;
+
+		var balls = [];
+		for (var i = 0; i < numBalls; i++) {
+			var ballDef = new b2BodyDef;
+			ballDef.type = b2Body.b2_dynamicBody;
+			var ypos = (Math.random() * 8) + 1;
+			var xpos = (Math.random() * 14) + 1;
+			var size = (Math.random() * 0.4) + 0.2;
+			ballDef.position.Set(xpos, ypos);
+
+			var ballFixture = new b2FixtureDef;
+			ballFixture.density = 10.0;
+			ballFixture.friction = 0.5;
+			ballFixture.restitution = 1;
+			ballFixture.shape = new b2CircleShape(size);
+
+			var newBall = world.CreateBody(ballDef);
+			newBall.CreateFixture(ballFixture);
+			balls.push(newBall);
+		}
+
+		var wallDefs = [
+			{x:8.3, y:0.03, w:8.3, h:0.03},
+			{x:8.3, y:13.33, w:8.3, h:0.03},
+			{x:0, y:6.67, w:0.03, h:6.67},
+			{x:16.7, y:6.67, w:0.03, h:6.67}
+		];
+		var walls = [];
+		for (var i = 0; i < wallDefs.length; i++) {
+			var wallDef = new b2BodyDef;
+			wallDef.type = b2Body.b2_staticBody;
+			wallDef.position.Set(wallDefs[i].x, wallDefs[i].y);
+			var newWall = world.CreateBody(wallDef);
+			var wallFixture = new b2FixtureDef;
+			wallFixture.density = 10;
+			wallFixture.friction = 0.5;
+			wallFixture.restitution = 1;
+			wallFixture.shape = new b2PolygonShape();
+			wallFixture.shape.SetAsBox(wallDefs[i].w, wallDefs[i].h);
+			newWall.CreateFixture(wallFixture);
+			walls.push(newWall);
+		}
+
+		var DebugDraw = new b2DebugDraw();
+		DebugDraw.SetSprite(context);
+		DebugDraw.SetDrawScale(30);
+		DebugDraw.SetFillAlpha(0.3);
+		DebugDraw.SetLineThickness(1);
+		DebugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
+		world.SetDebugDraw(DebugDraw);
+
+
+		function drawScreen() {
+			world.Step(6/60, 10, 10);
+			world.DrawDebugData();
+			world.ClearForces();
+		};
+
+		setInterval(drawScreen, 100);
+	};
+</script>
